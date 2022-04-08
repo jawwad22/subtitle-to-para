@@ -1,0 +1,437 @@
+00:00.240 --> 00:01.540
+Hi there.
+
+00:01.540 --> 00:03.550
+In this video, we are going to learn
+
+00:03.550 --> 00:06.540
+about Latency-based Routing Policy.
+
+00:06.540 --> 00:11.020
+If your application is hosted in multiple AWS regions,
+
+00:11.020 --> 00:15.020
+this policy helps improve performance for the users
+
+00:15.020 --> 00:18.660
+by serving their request from the AWS region
+
+00:18.660 --> 00:22.940
+that provides the lowest latency to the user.
+
+00:22.940 --> 00:24.840
+So how does it do it?
+
+00:24.840 --> 00:28.350
+Well, first you create a latency records for
+
+00:28.350 --> 00:32.140
+your resources in multiple AWS regions.
+
+00:32.140 --> 00:36.040
+Then, when the route 53 receives a DNS query
+
+00:36.040 --> 00:39.180
+for the domain, it determines which region
+
+00:39.180 --> 00:42.140
+gives the user the lowest latency,
+
+00:42.140 --> 00:46.380
+and then selects a latency record for that region.
+
+00:46.380 --> 00:49.720
+And finally, route 53 responds with the value
+
+00:49.720 --> 00:51.440
+from that selected record,
+
+00:51.440 --> 00:55.740
+such as the IP address of a web server.
+
+00:55.740 --> 00:57.240
+We are going to see this in a
+
+00:57.270 --> 01:00.640
+live demonstration in just a few minutes.
+
+01:00.640 --> 01:03.410
+The scenarios in which this policy is useful,
+
+01:03.410 --> 01:07.100
+is basically any application that is deployed
+
+01:07.100 --> 01:10.170
+in multiple regions and requires a response
+
+01:10.170 --> 01:13.150
+from the resources in terms of milliseconds
+
+01:13.150 --> 01:15.420
+or even microseconds.
+
+01:15.420 --> 01:18.240
+For example, streaming media or online gaming
+
+01:18.240 --> 01:20.900
+applications would definitely benefit from
+
+01:21.060 --> 01:24.640
+latency-based routing policy.
+
+01:24.640 --> 01:26.200
+To demonstrate how the latency-based
+
+01:26.490 --> 01:28.420
+routing policy works,
+
+01:28.420 --> 01:30.740
+I will be setting up this scenario.
+
+01:30.740 --> 01:33.850
+Basically, I'll be creating two A records.
+
+01:33.850 --> 01:36.490
+The first A record will be a latency record
+
+01:36.490 --> 01:39.240
+for us-east-2 region.
+
+01:39.240 --> 01:44.240
+I will be creating an instance in that region as well.
+
+01:44.240 --> 01:47.080
+The second A record will be a latency
+
+01:47.080 --> 01:50.950
+based record for eu-west-3 or Paris region,
+
+01:50.950 --> 01:53.260
+which will have an instance created
+
+01:53.260 --> 01:55.940
+in that region as well.
+
+01:55.940 --> 01:58.110
+After setting these A records,
+
+01:58.110 --> 02:02.740
+when a user tries to go to this whizlabstest.com,
+
+02:02.740 --> 02:06.180
+that route 53 is first going to see the region
+
+02:06.180 --> 02:08.120
+to which the user belongs,
+
+02:08.120 --> 02:09.950
+in this case is us-east-1.
+
+02:11.440 --> 02:13.400
+The route 53 is going to then
+
+02:13.400 --> 02:16.620
+calculate the latency between the region
+
+02:16.620 --> 02:21.230
+of the origin which is us-east-1 and us-east-2.
+
+02:21.100 --> 02:24.540
+Let's say that latency is X.
+
+02:24.540 --> 02:27.220
+Route 53 is also going to calculate
+
+02:27.220 --> 02:32.590
+the latency between region us-east-1 and eu-west-3.
+
+02:32.120 --> 02:34.640
+Let's call that as Y.
+
+02:34.640 --> 02:38.930
+If the X is less than Y, that means the latency
+
+02:38.930 --> 02:43.060
+between us-east-1 and us-east-2 is lesser.
+
+02:43.060 --> 02:47.440
+So the traffic will be routed to us-east-2 region.
+
+02:47.440 --> 02:52.010
+However, if the latency Y is less than X
+
+02:52.010 --> 02:54.210
+that means the latency between the regions
+
+02:54.210 --> 02:58.040
+us-east-1, and eu-west-3 is lesser,
+
+02:58.040 --> 03:00.390
+so the traffic will be routed to eu-west-3.
+
+03:03.640 --> 03:06.910
+So in this scenario, most likely the traffic
+
+03:06.910 --> 03:09.880
+will be routed to us-east-2 region
+
+03:09.880 --> 03:11.860
+because geographically these two
+
+03:11.860 --> 03:13.980
+regions are closer to each other.
+
+03:13.980 --> 03:17.240
+However, this is not always guaranteed.
+
+03:17.240 --> 03:19.750
+So note that, the latency calculation
+
+03:19.750 --> 03:21.590
+between host on internet
+
+03:21.590 --> 03:24.490
+can change over time as a result of changes
+
+03:24.490 --> 03:27.540
+in network connectivity and routing.
+
+03:27.540 --> 03:30.140
+Also, latency measurements performed
+
+03:30.140 --> 03:31.950
+are over a period of time,
+
+03:31.950 --> 03:35.640
+it's not at that moment when the request comes.
+
+03:35.640 --> 03:39.190
+Similarly, let's say that in this scenario,
+
+03:39.190 --> 03:42.290
+a user from eu-west-2 region
+
+03:42.290 --> 03:47.040
+or London region sends a request to this whizlabstest.com.
+
+03:47.040 --> 03:49.690
+The route 53 is again going to calculate
+
+03:49.690 --> 03:53.530
+the latency between eu-west-2 and us-east-2
+
+03:53.650 --> 03:57.800
+as well as between eu-west-2 and eu-west-3.
+
+03:58.340 --> 04:01.730
+Most likely in this situation, the latency
+
+04:01.730 --> 04:04.550
+between eu-west-2 and eu-west-3 is going
+
+04:04.550 --> 04:07.580
+to be lesser, so the traffic will be forwarded
+
+04:07.580 --> 04:12.540
+to the instance in France or in Paris region.
+
+04:12.540 --> 04:15.450
+Let's create this scenario and see what happens.
+
+04:17.640 --> 04:21.650
+I am in AWS console and in Ohio region,
+
+04:21.650 --> 04:24.210
+I have created an instance that is Instance1.
+
+04:25.840 --> 04:27.630
+If you go there, it is going to display
+
+04:27.630 --> 04:31.640
+a text as this instance is in USA.
+
+04:31.640 --> 04:35.760
+Similarly, in the Paris region or eu-west-3,
+
+04:35.550 --> 04:38.040
+i have created another server
+
+04:38.040 --> 04:42.340
+which just displays a text, instance is in France.
+
+04:42.340 --> 04:44.940
+Now let us go to route 53.
+
+04:47.940 --> 04:49.460
+Go to the hosted zone,
+
+04:49.460 --> 04:52.940
+and let's create a record set.
+
+04:52.940 --> 04:55.840
+Keep the type as A record.
+
+04:55.840 --> 05:01.240
+I'm going to reduce the time to leave.
+
+05:01.240 --> 05:03.350
+The value for the first record is going
+
+05:03.350 --> 05:05.860
+to be the IP address of our instance,
+
+05:05.860 --> 05:08.640
+that is in United States of America.
+
+05:11.640 --> 05:15.640
+Select routing policy as latency.
+
+05:15.640 --> 05:18.660
+Now select the region to which this instance belongs.
+
+05:18.660 --> 05:21.000
+It has automatically selected us-east-2.
+
+05:21.000 --> 05:23.540
+So, I'm going to keep that.
+
+05:23.540 --> 05:25.320
+Give it an ID.
+
+05:29.740 --> 05:30.960
+Go ahead and create it.
+
+05:35.340 --> 05:40.840
+Similarly, let us add a record for Paris region.
+
+05:47.840 --> 05:50.380
+Select the region to which this instance belongs.
+
+05:53.740 --> 05:55.480
+Give it an ID.
+
+05:59.440 --> 06:00.460
+And create it.
+
+06:02.640 --> 06:04.640
+Now let us go ahead and test this
+
+06:04.640 --> 06:07.560
+using the test record set feature of route 53.
+
+06:11.740 --> 06:14.540
+Select the type as A record.
+
+06:14.540 --> 06:16.940
+Now here is what I'm going to do.
+
+06:16.940 --> 06:20.220
+I'm going to use an IP address that belong
+
+06:20.220 --> 06:23.190
+to a region, let's say in Canada and see
+
+06:23.190 --> 06:25.640
+where the request gets routed to.
+
+06:25.640 --> 06:28.860
+I am going to use this website which gives me few
+
+06:28.860 --> 06:32.040
+IP addresses that belong to Canada region.
+
+06:32.040 --> 06:36.740
+So just grab any IP address,
+
+06:36.740 --> 06:39.480
+go to route 53 and use this as the resolver
+
+06:39.480 --> 06:44.140
+IP address and hit 'Get response.'
+
+06:44.140 --> 06:45.680
+And you can see that the response
+
+06:45.680 --> 06:49.680
+written by route 53 is an IP address that belongs
+
+06:49.680 --> 06:52.770
+to the us-west-2 region.
+
+06:59.640 --> 07:02.450
+Now, let us select a region that is closer
+
+07:02.450 --> 07:03.600
+to Paris region.
+
+07:03.600 --> 07:06.940
+How about London region?
+
+07:09.940 --> 07:12.440
+So here I have few IP addresses
+
+07:12.440 --> 07:14.370
+that belong to United Kingdom.
+
+07:14.370 --> 07:16.060
+Let's grab any one of them.
+
+07:20.240 --> 07:23.810
+Use that IP address as the resolver IP address.
+
+07:25.140 --> 07:26.330
+And there you go.
+
+07:26.330 --> 07:29.750
+The response written by route 53 is the
+
+07:29.750 --> 07:33.750
+IP address that belong to the instance in Paris.
+
+07:37.040 --> 07:40.310
+So, it is evident that the request
+
+07:40.310 --> 07:43.370
+of getting routed based on the origin
+
+07:43.370 --> 07:45.600
+IP addresses region,
+
+07:45.600 --> 07:47.440
+and the two regions in which we have
+
+07:47.440 --> 07:49.940
+set up the latency records.
+
+07:49.940 --> 07:52.040
+Go ahead and play with it.
+
+07:52.040 --> 07:54.500
+Use different IP addresses that belong
+
+07:54.500 --> 07:56.660
+to different regions and see where
+
+07:56.660 --> 07:58.330
+the request gets routed to.
+
+07:58.330 --> 08:01.570
+You will notice that the latencies can be
+
+08:01.570 --> 08:03.350
+calculated based on the position
+
+08:03.350 --> 08:04.940
+where the regions are
+
+08:04.940 --> 08:07.160
+and more often than not, the request
+
+08:07.160 --> 08:09.550
+will go to the region that is closer
+
+08:09.550 --> 08:11.980
+to the origin of the DNS query.
+
+08:11.980 --> 08:15.350
+And that's exactly how latency-based routing works.
